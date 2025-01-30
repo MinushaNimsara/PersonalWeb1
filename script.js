@@ -423,7 +423,158 @@ backToTop.addEventListener('click', () => {
         behavior: 'smooth'
     });
 });
+// Enhanced Menu Toggle Functionality
+const menuToggle = document.querySelector('.menu-toggle');
+const navLinks = document.querySelector('.nav-links');
+const navLinksItems = document.querySelectorAll('.nav-link');
+let isMenuOpen = false;
 
+const toggleMenu = () => {
+    isMenuOpen = !isMenuOpen;
+    menuToggle.classList.toggle('active');
+    navLinks.classList.toggle('active');
+    document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+    
+    // Animate nav links
+    navLinksItems.forEach((link, index) => {
+        if (isMenuOpen) {
+            link.style.transitionDelay = `${index * 0.1}s`;
+            link.style.opacity = '1';
+            link.style.transform = 'translateX(0)';
+        } else {
+            link.style.transitionDelay = '0s';
+            link.style.opacity = '0';
+            link.style.transform = 'translateX(30px)';
+        }
+    });
+};
+
+menuToggle.addEventListener('click', toggleMenu);
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (isMenuOpen && !e.target.closest('.nav-links') && !e.target.closest('.menu-toggle')) {
+        toggleMenu();
+    }
+});
+
+// Enhanced Scroll Animations
+const observerOptions = {
+    threshold: 0.2,
+    rootMargin: '0px'
+};
+
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            
+            // Add stagger effect for children
+            const staggerItems = entry.target.querySelectorAll('.stagger');
+            staggerItems.forEach((item, index) => {
+                item.style.transitionDelay = `${index * 0.1}s`;
+                item.classList.add('active');
+            });
+        }
+    });
+}, observerOptions);
+
+// Observe all reveal elements
+document.querySelectorAll('.reveal, .fade-up').forEach(element => {
+    revealObserver.observe(element);
+});
+
+// Smooth Scroll with Dynamic Offset
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (isMenuOpen) toggleMenu();
+        
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            const headerOffset = 80;
+            const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+
+// Enhanced Parallax Effect
+const parallaxElements = document.querySelectorAll('.parallax');
+
+window.addEventListener('scroll', () => {
+    parallaxElements.forEach(element => {
+        const speed = element.dataset.speed || 0.5;
+        const yPos = -(window.pageYOffset * speed);
+        element.style.transform = `translateY(${yPos}px)`;
+    });
+});
+
+// Page Load Animation
+window.addEventListener('load', () => {
+    document.body.classList.add('page-transition');
+});
+
+// Prevent animation during window resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+    document.body.classList.add('resize-animation-stopper');
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        document.body.classList.remove('resize-animation-stopper');
+    }, 400);
+});
+document.addEventListener("DOMContentLoaded", function () {
+    const percentElements = document.querySelectorAll('.skill-percent');
+    const progressBars = document.querySelectorAll('.progress');
+
+    const animateSkills = () => {
+        percentElements.forEach((element, index) => {
+            const targetPercent = parseInt(element.dataset.percent);
+            const progressBar = progressBars[index];
+
+            // Animate percentage counter
+            let currentPercent = 0;
+            const increment = targetPercent / 100; // Adjust for speed
+            
+            const updateCounter = () => {
+                if (currentPercent < targetPercent) {
+                    currentPercent += increment;
+                    element.textContent = Math.ceil(currentPercent) + "%";
+                    requestAnimationFrame(updateCounter);
+                }
+            };
+
+            // Trigger CSS transition for progress bar
+            progressBar.style.width = targetPercent + "%";
+            
+            // Start counter animation
+            updateCounter();
+        });
+    };
+
+    // Intersection Observer setup
+    const skillsSection = document.getElementById('skills');
+    if (skillsSection) {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        animateSkills();
+                        observer.unobserve(skillsSection);
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+        observer.observe(skillsSection);
+    }
+});
 
 // Update copyright year automatically
 document.querySelector('.copyright').textContent = 
