@@ -234,6 +234,7 @@
     }
 }
 
+
 /* Stop animations during window resize */
 .resize-animation-stopper * {
     animation: none !important;
